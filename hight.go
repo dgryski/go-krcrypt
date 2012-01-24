@@ -46,12 +46,12 @@ func NewHight(key []byte) (*HightCipher, error) {
 
 // Reset zeros the key data so that it will no longer appear in the process' memory.
 func (c *HightCipher) Reset() {
-	for i := range wk {
-		wk[i] = 0
+	for i := range c.wk {
+		c.wk[i] = 0
 	}
 
-	for i := range sk {
-		sk[i] = 0
+	for i := range c.sk {
+		c.sk[i] = 0
 	}
 
 }
