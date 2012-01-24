@@ -20,7 +20,7 @@ import (
 	"encoding/binary"
 )
 
-// rotate left
+// rotate 64 bits left by one byte
 func rotlbyte32(x0, x1 uint32) (uint32, uint32) {
 	b0 := (x0 & 0xff000000) >> 24
 	b1 := (x1 & 0xff000000) >> 24
@@ -29,6 +29,7 @@ func rotlbyte32(x0, x1 uint32) (uint32, uint32) {
 	return x0, x1
 }
 
+// rotate 64 bits right by one byte
 func rotrbyte32(x0, x1 uint32) (uint32, uint32) {
 	b0 := (x0 & 0x000000ff) << 24
 	b1 := (x1 & 0x000000ff) << 24
@@ -37,19 +38,28 @@ func rotrbyte32(x0, x1 uint32) (uint32, uint32) {
 	return x0, x1
 }
 
+// A SEEDCipher is an instance of SEED encryption using a particular key
 type SEEDCipher struct {
 	k0 [17]uint32 // 1 extra to make our lives easier w/r/t indexing
-	k1 [17]uint32 // 1 extra to make our lives easier w/r/t indexing
+	k1 [17]uint32
 }
 
+// NewSEED creates and returns a new SEEDCipher.  The key argument should be 16 bytes.
 func NewSEED(key []byte) (*SEEDCipher, error) {
 	c := new(SEEDCipher)
+
+	if klen := len(key); klen != 16 {
+		return nil, KeySizeError(len(key))
+	}
+
 	c.subkeys(key)
 	return c, nil
 }
 
+// BlockSize returns the HIGHT block size.  It is needed to satisfy the Block interface in crypto/cipher.
 func (c *SEEDCipher) BlockSize() int { return 16 }
 
+// Encrypt encrypts the 16-byte block in src and stores the resulting ciphertext in dst.
 func (c *SEEDCipher) Encrypt(dst, src []byte) {
 
 	var l0, l1, r0, r1 uint32
@@ -81,6 +91,13 @@ func (c *SEEDCipher) Encrypt(dst, src []byte) {
 	copy(dst, buf.Bytes())
 }
 
+// Decrypt decrypts the 16-byte block in src and stores the resulting plaintext in dst.
+func (c *SEEDCipher) Decrypt(dst, src []byte) {
+    // FIXME: stub
+    copy(dst, src)
+}
+
+// compute the round subkeys
 func (c *SEEDCipher) subkeys(key []byte) {
 
 	var key0, key1, key2, key3 uint32
