@@ -93,8 +93,8 @@ func (c *SEEDCipher) Encrypt(dst, src []byte) {
 
 // Decrypt decrypts the 16-byte block in src and stores the resulting plaintext in dst.
 func (c *SEEDCipher) Decrypt(dst, src []byte) {
-    // FIXME: stub
-    copy(dst, src)
+	// FIXME: stub
+	copy(dst, src)
 }
 
 // compute the round subkeys
