@@ -1,4 +1,5 @@
 package dkrcrypt
+
 // The HIGHT Block cipher from KISA
 // Copyright (c) 2012 Damian Gryski <damian@gryski.com>
 // Licensed under the GPLv3 or, at your option, any later version.
@@ -12,6 +13,10 @@ http://www.iacr.org/cryptodb/archive/2006/CHES/04/04.pdf
 http://seed.kisa.or.kr/kor/hight/hightInfo.jsp
 
 */
+
+import (
+	"strconv"
+)
 
 // A HightCipher is an instance of HIGHT encryption using a particular key.
 type HightCipher struct {
