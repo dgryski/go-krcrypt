@@ -27,7 +27,7 @@ type HightCipher struct {
 type KeySizeError int
 
 func (k KeySizeError) Error() string {
-	return "dkrcrypt/hight: invalid key size " + strconv.Itoa(int(k))
+	return "dkrcrypt: invalid key size " + strconv.Itoa(int(k))
 }
 
 // NewHight creates and returns a new HightCipher.
@@ -37,10 +37,10 @@ func NewHight(key []byte) (*HightCipher, error) {
 
 	if klen := len(key); klen != 16 {
 		return nil, KeySizeError(len(key))
-	}
+        }
 
-	whiten(key, c.wk[:])
-	subkey(key, c.sk[:])
+	c.whiten(key)
+	c.subkeys(key)
 	return c, nil
 }
 
@@ -159,14 +159,14 @@ func (c *HightCipher) Decrypt(dst, src []byte) {
 	dst[0] = x[7]           // p7
 }
 
-func whiten(mk, wk []byte) {
+func (c *HightCipher) whiten(mk []byte) {
 
 	for i := 0; i < 4; i++ {
-		wk[i] = mk[16-i-12-1]
+		c.wk[i] = mk[16-i-12-1]
 	}
 
 	for i := 4; i < 8; i++ {
-		wk[i] = mk[16-i+4-1]
+		c.wk[i] = mk[16-i+4-1]
 	}
 }
 
@@ -201,7 +201,7 @@ var delta = []byte{
 	0x74, 0x3a, 0x5d, 0x2e, 0x57, 0x6b, 0x35, 0x5a,
 }
 
-func subkey(mk, sk []byte) {
+func (c *HightCipher) subkeys(mk []byte) {
 
 	for i := 0; i < 8; i++ {
 
@@ -210,7 +210,7 @@ func subkey(mk, sk []byte) {
 			if k < 0 {
 				k += 8
 			}
-			sk[16*i+j] = mk[16-k-1] + delta[16*i+j]
+			c.sk[16*i+j] = mk[16-k-1] + delta[16*i+j]
 		}
 
 		for j := 0; j < 8; j++ {
@@ -218,7 +218,7 @@ func subkey(mk, sk []byte) {
 			if k < 0 {
 				k += 8
 			}
-			sk[16*i+j+8] = mk[16-k-8-1] + delta[16*i+j+8]
+			c.sk[16*i+j+8] = mk[16-k-8-1] + delta[16*i+j+8]
 		}
 
 	}
