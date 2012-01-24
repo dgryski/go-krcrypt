@@ -60,18 +60,18 @@ func (c *HightCipher) Reset() {
 func (c *HightCipher) BlockSize() int { return 8 }
 
 // rotate left
-func rotl(x byte, r byte) byte {
+func rotl8(x byte, r byte) byte {
 	return (x << r) | (x >> (8 - r))
 }
 
 // F0, from the specification
 func f0(x byte) byte {
-	return rotl(x, 1) ^ rotl(x, 2) ^ rotl(x, 7)
+	return rotl8(x, 1) ^ rotl8(x, 2) ^ rotl8(x, 7)
 }
 
 // F1, from the specification
 func f1(x byte) byte {
-	return rotl(x, 3) ^ rotl(x, 4) ^ rotl(x, 6)
+	return rotl8(x, 3) ^ rotl8(x, 4) ^ rotl8(x, 6)
 }
 
 // Encrypt encrypts the 8-byte block in src and stores the resulting ciphertext in dst.
