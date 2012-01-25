@@ -48,7 +48,7 @@ func NewSEED(key []byte) (*SEEDCipher, error) {
 	c := new(SEEDCipher)
 
 	if klen := len(key); klen != 16 {
-		return nil, KeySizeError(len(key))
+		return nil, KeySizeError(klen)
 	}
 
 	c.subkeys(key)

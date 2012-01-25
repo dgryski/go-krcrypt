@@ -36,7 +36,7 @@ func NewHight(key []byte) (*HightCipher, error) {
 	c := new(HightCipher)
 
 	if klen := len(key); klen != 16 {
-		return nil, KeySizeError(len(key))
+		return nil, KeySizeError(klen)
         }
 
 	c.whiten(key)
