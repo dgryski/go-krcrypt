@@ -97,6 +97,14 @@ func (c *SEEDCipher) Decrypt(dst, src []byte) {
 	copy(dst, src)
 }
 
+// Reset zeros the key data so that it will no longer appear in the process' memory.
+func (c *SEEDCipher) Reset() {
+	for i := range c.k0 {
+		c.k0[i] = 0
+		c.k1[i] = 0
+	}
+}
+
 // compute the round subkeys
 func (c *SEEDCipher) subkeys(key []byte) {
 
