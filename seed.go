@@ -16,7 +16,6 @@ http://seed.kisa.or.kr/eng/about/about.jsp
 */
 
 import (
-	"bytes"
 	"encoding/binary"
 )
 
@@ -62,14 +61,10 @@ func (c *SEEDCipher) BlockSize() int { return 16 }
 // Encrypt encrypts the 16-byte block in src and stores the resulting ciphertext in dst.
 func (c *SEEDCipher) Encrypt(dst, src []byte) {
 
-	var l0, l1, r0, r1 uint32
-
-	buf := bytes.NewBuffer(src)
-
-	binary.Read(buf, binary.BigEndian, &l0)
-	binary.Read(buf, binary.BigEndian, &l1)
-	binary.Read(buf, binary.BigEndian, &r0)
-	binary.Read(buf, binary.BigEndian, &r1)
+	l0 := binary.BigEndian.Uint32(src)
+	l1 := binary.BigEndian.Uint32(src[4:])
+	r0 := binary.BigEndian.Uint32(src[8:])
+	r1 := binary.BigEndian.Uint32(src[12:])
 
 	for i := 1; i <= 15; i++ {
 		t0, t1 := r0, r1
@@ -82,26 +77,19 @@ func (c *SEEDCipher) Encrypt(dst, src []byte) {
 	l0 ^= f0
 	l1 ^= f1
 
-	buf = bytes.NewBuffer(nil)
-	binary.Write(buf, binary.BigEndian, l0)
-	binary.Write(buf, binary.BigEndian, l1)
-	binary.Write(buf, binary.BigEndian, r0)
-	binary.Write(buf, binary.BigEndian, r1)
-
-	copy(dst, buf.Bytes())
+	binary.BigEndian.PutUint32(dst, l0)
+	binary.BigEndian.PutUint32(dst[4:], l1)
+	binary.BigEndian.PutUint32(dst[8:], r0)
+	binary.BigEndian.PutUint32(dst[12:], r1)
 }
 
 // Decrypt decrypts the 16-byte block in src and stores the resulting plaintext in dst.
 func (c *SEEDCipher) Decrypt(dst, src []byte) {
 
-	var l0, l1, r0, r1 uint32
-
-	buf := bytes.NewBuffer(src)
-
-	binary.Read(buf, binary.BigEndian, &l0)
-	binary.Read(buf, binary.BigEndian, &l1)
-	binary.Read(buf, binary.BigEndian, &r0)
-	binary.Read(buf, binary.BigEndian, &r1)
+	l0 := binary.BigEndian.Uint32(src)
+	l1 := binary.BigEndian.Uint32(src[4:])
+	r0 := binary.BigEndian.Uint32(src[8:])
+	r1 := binary.BigEndian.Uint32(src[12:])
 
 	f0, f1 := f(c.k0[16], c.k1[16], r0, r1)
 	l0 ^= f0
@@ -114,13 +102,10 @@ func (c *SEEDCipher) Decrypt(dst, src []byte) {
 		r0, r1 = t0, t1
 	}
 
-	buf = bytes.NewBuffer(nil)
-	binary.Write(buf, binary.BigEndian, l0)
-	binary.Write(buf, binary.BigEndian, l1)
-	binary.Write(buf, binary.BigEndian, r0)
-	binary.Write(buf, binary.BigEndian, r1)
-
-	copy(dst, buf.Bytes())
+	binary.BigEndian.PutUint32(dst, l0)
+	binary.BigEndian.PutUint32(dst[4:], l1)
+	binary.BigEndian.PutUint32(dst[8:], r0)
+	binary.BigEndian.PutUint32(dst[12:], r1)
 }
 
 // Reset zeros the key data so that it will no longer appear in the process' memory.
@@ -134,13 +119,10 @@ func (c *SEEDCipher) Reset() {
 // compute the round subkeys
 func (c *SEEDCipher) subkeys(key []byte) {
 
-	var key0, key1, key2, key3 uint32
-
-	buf := bytes.NewBuffer(key)
-	binary.Read(buf, binary.BigEndian, &key0)
-	binary.Read(buf, binary.BigEndian, &key1)
-	binary.Read(buf, binary.BigEndian, &key2)
-	binary.Read(buf, binary.BigEndian, &key3)
+	key0 := binary.BigEndian.Uint32(key)
+	key1 := binary.BigEndian.Uint32(key[4:])
+	key2 := binary.BigEndian.Uint32(key[8:])
+	key3 := binary.BigEndian.Uint32(key[12:])
 
 	for i := 1; i <= 16; i++ {
 		c.k0[i] = g(key0 + key2 - kc[i])
