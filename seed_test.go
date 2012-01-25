@@ -19,7 +19,7 @@ func TestSEEDEncrypt(t *testing.T) {
 	for _, v := range seedTestVectors {
 		h, _ := NewSEED(v.key)
 
-		var c [16]byte
+		var c, p [16]byte
 
 		h.Encrypt(c[:], v.plain)
 
@@ -27,12 +27,10 @@ func TestSEEDEncrypt(t *testing.T) {
 			t.Errorf("seed encrypt failed: got %#v wanted %#v\n", c, v.cipher)
 		}
 
-		/*
-			h.Decrypt(p[:], c[:])
+		h.Decrypt(p[:], c[:])
 
-			if bytes.Compare(v.plain, p[:]) != 0 {
-				t.Errorf("hight decrypt failed: got %#v wanted %#v\n", p, v.plain)
-			}
-		*/
+		if bytes.Compare(v.plain, p[:]) != 0 {
+			t.Errorf("seed decrypt failed: got %#v wanted %#v\n", p, v.plain)
+		}
 	}
 }

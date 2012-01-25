@@ -82,7 +82,7 @@ func (c *SEEDCipher) Encrypt(dst, src []byte) {
 	l0 ^= f0
 	l1 ^= f1
 
-	buf.Reset()
+	buf = bytes.NewBuffer(nil)
 	binary.Write(buf, binary.BigEndian, l0)
 	binary.Write(buf, binary.BigEndian, l1)
 	binary.Write(buf, binary.BigEndian, r0)
@@ -93,8 +93,34 @@ func (c *SEEDCipher) Encrypt(dst, src []byte) {
 
 // Decrypt decrypts the 16-byte block in src and stores the resulting plaintext in dst.
 func (c *SEEDCipher) Decrypt(dst, src []byte) {
-	// FIXME: stub
-	copy(dst, src)
+
+	var l0, l1, r0, r1 uint32
+
+	buf := bytes.NewBuffer(src)
+
+	binary.Read(buf, binary.BigEndian, &l0)
+	binary.Read(buf, binary.BigEndian, &l1)
+	binary.Read(buf, binary.BigEndian, &r0)
+	binary.Read(buf, binary.BigEndian, &r1)
+
+	f0, f1 := f(c.k0[16], c.k1[16], r0, r1)
+	l0 ^= f0
+	l1 ^= f1
+
+	for i := 15; i >= 1; i-- {
+		t0, t1 := l0, l1
+		f0, f1 := f(c.k0[i], c.k1[i], t0, t1)
+		l0, l1 = r0^f0, r1^f1
+		r0, r1 = t0, t1
+	}
+
+	buf = bytes.NewBuffer(nil)
+	binary.Write(buf, binary.BigEndian, l0)
+	binary.Write(buf, binary.BigEndian, l1)
+	binary.Write(buf, binary.BigEndian, r0)
+	binary.Write(buf, binary.BigEndian, r1)
+
+	copy(dst, buf.Bytes())
 }
 
 // Reset zeros the key data so that it will no longer appear in the process' memory.
