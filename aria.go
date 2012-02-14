@@ -1,25 +1,37 @@
 package dkrcrypt
 
-import ()
+// The ARIA Block cipher from KISA
+// Copyright (c) 2012 Damian Gryski <damian@gryski.com>
+// Licensed under the GPLv3 or, at your option, any later version.
 
 // The cipher operates on 128-bit items, but some pieces are in bytes.
 // This entire implementation is based around byte, but we should perhaps switch to larger (32-bit?) items.
 
-// http://seed.kisa.or.kr/kor/aria/aria.jsp
-// http://210.104.33.10/ARIA/index-e.html
-// http://tools.ietf.org/html/rfc5794
+/*
+
+References:
+
+http://210.104.33.10/ARIA/index-e.html
+http://tools.ietf.org/html/rfc5794
+http://seed.kisa.or.kr/kor/aria/aria.jsp
+
+*/
+
+// An AriaCipher is an instance of ARIA encryption using a particular key
 type AriaCipher struct {
-	ek     [18][16]byte
-	dk     [18][16]byte
-	rounds int
+	ek     [18][16]byte // encryption subkeys
+	dk     [18][16]byte // decryption subkeys
+	rounds int          // how many rounds
 }
 
+// constants for key whitening
 var (
 	c1 = []byte{0x51, 0x7c, 0xc1, 0xb7, 0x27, 0x22, 0x0a, 0x94, 0xfe, 0x13, 0xab, 0xe8, 0xfa, 0x9a, 0x6e, 0xe0}
 	c2 = []byte{0x6d, 0xb1, 0x4a, 0xcc, 0x9e, 0x21, 0xc8, 0x20, 0xff, 0x28, 0xb1, 0xd5, 0xef, 0x5d, 0xe2, 0xb0}
 	c3 = []byte{0xdb, 0x92, 0x37, 0x1d, 0x21, 0x26, 0xe9, 0x70, 0x03, 0x24, 0x97, 0x75, 0x04, 0xe8, 0xc9, 0x0e}
 )
 
+// rotate a slice of 16 bytes right by 'count' bits.  The output goes in 'o'
 func rotrslice(b []byte, count int, o []byte) []byte {
 
 	bitrot := uint(count % 8)
@@ -39,16 +51,20 @@ func rotrslice(b []byte, count int, o []byte) []byte {
 	return o
 }
 
+// rotate a slice of 16 bytes right by 'count' bits.  The output goes in 'o'
 func rotlslice(b []byte, count int, o []byte) []byte {
 	return rotrslice(b, (16*8)-count, o)
 }
 
+// xor two slices: o = a ^ b
 func xorslice(o, a, b []byte) {
 	for i := 0; i < len(o); i++ {
 		o[i] = a[i] ^ b[i]
 	}
 }
 
+// NewAria creates and returns a new AriaCipher.
+// The key argument should be 16/24/32 bytes.
 func NewAria(key []byte) (*AriaCipher, error) {
 
 	c := new(AriaCipher)
@@ -131,14 +147,21 @@ func NewAria(key []byte) (*AriaCipher, error) {
 	return c, nil
 }
 
+// BlockSize returns the ARIA block size.  It is needed to satisfy the Block interface in crypto/cipher.
+func (c *AriaCipher) BlockSize() int { return 8 }
+
+// Encrypt encrypts the 8-byte block in src and stores the resulting ciphertext in dst.
 func (c *AriaCipher) Encrypt(dst, src []byte) {
 	process(dst, src, c.ek[:], c.rounds)
 }
 
+// Decrypt decrypts the 8-byte block in src and stores the resulting plaintext in dst.
 func (c *AriaCipher) Decrypt(dst, src []byte) {
 	process(dst, src, c.dk[:], c.rounds)
 }
 
+// the main crypter function, shared between encryption and decryption.
+// only the round keys are different
 func process(dst, src []byte, rk [][16]byte, rounds int) {
 
 	var out [16]byte
@@ -171,6 +194,7 @@ func process(dst, src []byte, rk [][16]byte, rounds int) {
 	xorslice(dst, out[:], rk[rounds+1][:])
 }
 
+// round function for odd rounds
 func fo(d, rk, out []byte) {
 
 	var o [16]byte
@@ -180,6 +204,7 @@ func fo(d, rk, out []byte) {
 	a(o[:], out)
 }
 
+// round function for even rounds
 func fe(d, rk, out []byte) {
 
 	var o [16]byte
@@ -189,6 +214,7 @@ func fe(d, rk, out []byte) {
 	a(o[:], out)
 }
 
+// substitution layer
 func sl1(x, y []byte) {
 
 	y[0] = sb1[x[0]]
@@ -254,6 +280,7 @@ func a(x, y []byte) {
 	y[15] = x[1] ^ x[2] ^ x[4] ^ x[5] ^ x[8] ^ x[10] ^ x[15]
 }
 
+// s-boxes, converted from the RFC
 var sb1 = [...]byte{
 	0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
 	0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
@@ -310,6 +337,7 @@ var sb3 = [...]byte{
 	0xa0, 0xe0, 0x3b, 0x4d, 0xae, 0x2a, 0xf5, 0xb0, 0xc8, 0xeb, 0xbb, 0x3c, 0x83, 0x53, 0x99, 0x61,
 	0x17, 0x2b, 0x04, 0x7e, 0xba, 0x77, 0xd6, 0x26, 0xe1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0c, 0x7d,
 }
+
 var sb4 = [...]byte{
 	0x30, 0x68, 0x99, 0x1b, 0x87, 0xb9, 0x21, 0x78, 0x50, 0x39, 0xdb, 0xe1, 0x72, 0x09, 0x62, 0x3c,
 	0x3e, 0x7e, 0x5e, 0x8e, 0xf1, 0xa0, 0xcc, 0xa3, 0x2a, 0x1d, 0xfb, 0xb6, 0xd6, 0x20, 0xc4, 0x8d,
