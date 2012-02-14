@@ -5,6 +5,9 @@ import ()
 // The cipher operates on 128-bit items, but some pieces are in bytes.
 // This entire implementation is based around byte, but we should perhaps switch to larger (32-bit?) items.
 
+// http://seed.kisa.or.kr/kor/aria/aria.jsp
+// http://210.104.33.10/ARIA/index-e.html
+// http://tools.ietf.org/html/rfc5794
 type AriaCipher struct {
 	ek     [18][16]byte
 	dk     [18][16]byte
@@ -129,14 +132,14 @@ func NewAria(key []byte) (*AriaCipher, error) {
 }
 
 func (c *AriaCipher) Encrypt(dst, src []byte) {
-	process(dst, src, c.ek[:])
+	process(dst, src, c.ek[:], c.rounds)
 }
 
 func (c *AriaCipher) Decrypt(dst, src []byte) {
-	process(dst, src, c.dk[:])
+	process(dst, src, c.dk[:], c.rounds)
 }
 
-func process(dst, src []byte, rk [][16]byte) {
+func process(dst, src []byte, rk [][16]byte, rounds int) {
 
 	var out [16]byte
 
@@ -152,10 +155,20 @@ func process(dst, src []byte, rk [][16]byte) {
 	fe(out[:], rk[10][:], out[:])
 	fo(out[:], rk[11][:], out[:])
 
+	if rounds > 12 {
+		fe(out[:], rk[12][:], out[:])
+		fo(out[:], rk[13][:], out[:])
+	}
+
+	if rounds > 14 {
+		fe(out[:], rk[14][:], out[:])
+		fo(out[:], rk[15][:], out[:])
+	}
+
 	// final round
-	xorslice(out[:], rk[12][:], out[:])
+	xorslice(out[:], rk[rounds][:], out[:])
 	sl2(out[:], out[:])
-	xorslice(dst, out[:], rk[13][:])
+	xorslice(dst, out[:], rk[rounds+1][:])
 }
 
 func fo(d, rk, out []byte) {
