@@ -19,8 +19,8 @@ http://seed.kisa.or.kr/kor/aria/aria.jsp
 
 // An AriaCipher is an instance of ARIA encryption using a particular key
 type AriaCipher struct {
-	ek     [18][16]byte // encryption subkeys
-	dk     [18][16]byte // decryption subkeys
+	ek     [17][16]byte // encryption subkeys
+	dk     [17][16]byte // decryption subkeys
 	rounds int          // how many rounds
 }
 
@@ -115,34 +115,34 @@ func NewAria(key []byte) (*AriaCipher, error) {
 	out := make([]byte, 16)
 
 	// create subkeys
-	xorslice(c.ek[1][:], w0, rotrslice(w1, 19, out))
-	xorslice(c.ek[2][:], w1, rotrslice(w2, 19, out))
-	xorslice(c.ek[3][:], w2, rotrslice(w3, 19, out))
-	xorslice(c.ek[4][:], w3, rotrslice(w0, 19, out))
+	xorslice(c.ek[0][:], w0, rotrslice(w1, 19, out))
+	xorslice(c.ek[1][:], w1, rotrslice(w2, 19, out))
+	xorslice(c.ek[2][:], w2, rotrslice(w3, 19, out))
+	xorslice(c.ek[3][:], w3, rotrslice(w0, 19, out))
 
-	xorslice(c.ek[5][:], w0, rotrslice(w1, 31, out))
-	xorslice(c.ek[6][:], w1, rotrslice(w2, 31, out))
-	xorslice(c.ek[7][:], w2, rotrslice(w3, 31, out))
-	xorslice(c.ek[8][:], w3, rotrslice(w0, 31, out))
+	xorslice(c.ek[4][:], w0, rotrslice(w1, 31, out))
+	xorslice(c.ek[5][:], w1, rotrslice(w2, 31, out))
+	xorslice(c.ek[6][:], w2, rotrslice(w3, 31, out))
+	xorslice(c.ek[7][:], w3, rotrslice(w0, 31, out))
 
-	xorslice(c.ek[9][:], w0, rotlslice(w1, 61, out))
-	xorslice(c.ek[10][:], w1, rotlslice(w2, 61, out))
-	xorslice(c.ek[11][:], w2, rotlslice(w3, 61, out))
-	xorslice(c.ek[12][:], w3, rotlslice(w0, 61, out))
+	xorslice(c.ek[8][:], w0, rotlslice(w1, 61, out))
+	xorslice(c.ek[9][:], w1, rotlslice(w2, 61, out))
+	xorslice(c.ek[10][:], w2, rotlslice(w3, 61, out))
+	xorslice(c.ek[11][:], w3, rotlslice(w0, 61, out))
 
-	xorslice(c.ek[13][:], w0, rotlslice(w1, 31, out))
-	xorslice(c.ek[14][:], w1, rotlslice(w2, 31, out))
-	xorslice(c.ek[15][:], w2, rotlslice(w3, 31, out))
-	xorslice(c.ek[16][:], w3, rotlslice(w0, 31, out))
+	xorslice(c.ek[12][:], w0, rotlslice(w1, 31, out))
+	xorslice(c.ek[13][:], w1, rotlslice(w2, 31, out))
+	xorslice(c.ek[14][:], w2, rotlslice(w3, 31, out))
+	xorslice(c.ek[15][:], w3, rotlslice(w0, 31, out))
 
-	xorslice(c.ek[17][:], w0, rotlslice(w1, 19, out))
+	xorslice(c.ek[16][:], w0, rotlslice(w1, 19, out))
 
 	// decryption subkeys
-	copy(c.dk[1][:], c.ek[c.rounds+1][:])
+	copy(c.dk[0][:], c.ek[c.rounds][:])
 	for i := 1; i < c.rounds; i++ {
-		a(c.ek[c.rounds+1-i][:], c.dk[i+1][:])
+		a(c.ek[c.rounds-i][:], c.dk[i][:])
 	}
-	copy(c.dk[c.rounds+1][:], c.ek[1][:])
+	copy(c.dk[c.rounds][:], c.ek[0][:])
 
 	return c, nil
 }
@@ -166,32 +166,32 @@ func process(dst, src []byte, rk [][16]byte, rounds int) {
 
 	var out [16]byte
 
-	fo(src, rk[1][:], out[:])
-	fe(out[:], rk[2][:], out[:])
-	fo(out[:], rk[3][:], out[:])
-	fe(out[:], rk[4][:], out[:])
-	fo(out[:], rk[5][:], out[:])
-	fe(out[:], rk[6][:], out[:])
-	fo(out[:], rk[7][:], out[:])
-	fe(out[:], rk[8][:], out[:])
-	fo(out[:], rk[9][:], out[:])
-	fe(out[:], rk[10][:], out[:])
-	fo(out[:], rk[11][:], out[:])
+	fo(src, rk[0][:], out[:])
+	fe(out[:], rk[1][:], out[:])
+	fo(out[:], rk[2][:], out[:])
+	fe(out[:], rk[3][:], out[:])
+	fo(out[:], rk[4][:], out[:])
+	fe(out[:], rk[5][:], out[:])
+	fo(out[:], rk[6][:], out[:])
+	fe(out[:], rk[7][:], out[:])
+	fo(out[:], rk[8][:], out[:])
+	fe(out[:], rk[9][:], out[:])
+	fo(out[:], rk[10][:], out[:])
 
 	if rounds > 12 {
-		fe(out[:], rk[12][:], out[:])
-		fo(out[:], rk[13][:], out[:])
+		fe(out[:], rk[11][:], out[:])
+		fo(out[:], rk[12][:], out[:])
 	}
 
 	if rounds > 14 {
-		fe(out[:], rk[14][:], out[:])
-		fo(out[:], rk[15][:], out[:])
+		fe(out[:], rk[13][:], out[:])
+		fo(out[:], rk[14][:], out[:])
 	}
 
 	// final round
-	xorslice(out[:], rk[rounds][:], out[:])
+	xorslice(out[:], rk[rounds-1][:], out[:])
 	sl2(out[:], out[:])
-	xorslice(dst, out[:], rk[rounds+1][:])
+	xorslice(dst, out[:], rk[rounds][:])
 }
 
 // round function for odd rounds
