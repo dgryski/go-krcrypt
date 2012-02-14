@@ -44,18 +44,6 @@ func NewHight(key []byte) (*HightCipher, error) {
 	return c, nil
 }
 
-// Reset zeros the key data so that it will no longer appear in the process' memory.
-func (c *HightCipher) Reset() {
-	for i := range c.wk {
-		c.wk[i] = 0
-	}
-
-	for i := range c.sk {
-		c.sk[i] = 0
-	}
-
-}
-
 // BlockSize returns the Hight block size.  It is needed to satisfy the Block interface in crypto/cipher.
 func (c *HightCipher) BlockSize() int { return 8 }
 
