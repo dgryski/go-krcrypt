@@ -32,7 +32,7 @@ var (
 )
 
 // rotate a slice of 16 bytes right by 'count' bits.  The output goes in 'o'
-func rotrslice(b []byte, count int, o []byte) []byte {
+func rotrslice(o, b []byte, count int) []byte {
 
 	bitrot := uint(count % 8)
 	byterot := count / 8
@@ -52,8 +52,8 @@ func rotrslice(b []byte, count int, o []byte) []byte {
 }
 
 // rotate a slice of 16 bytes left by 'count' bits.  The output goes in 'o'
-func rotlslice(b []byte, count int, o []byte) []byte {
-	return rotrslice(b, (16*8)-count, o)
+func rotlslice(o, b []byte, count int) []byte {
+	return rotrslice(o, b, (16*8)-count)
 }
 
 // xor two slices: o = a ^ b
@@ -103,39 +103,39 @@ func NewAria(key []byte) (*AriaCipher, error) {
 	w3 := make([]byte, 16)
 
 	copy(w0, kl)
-	fo(w0, ck1, w1)
+	fo(w1, w0, ck1)
 	xorslice(w1, w1, kr)
 
-	fe(w1, ck2, w2)
+	fe(w2, w1, ck2)
 	xorslice(w2, w2, w0)
 
-	fo(w2, ck3, w3)
+	fo(w3, w2, ck3)
 	xorslice(w3, w3, w1)
 
 	out := make([]byte, 16)
 
 	// create subkeys
-	xorslice(c.ek[0][:], w0, rotrslice(w1, 19, out))
-	xorslice(c.ek[1][:], w1, rotrslice(w2, 19, out))
-	xorslice(c.ek[2][:], w2, rotrslice(w3, 19, out))
-	xorslice(c.ek[3][:], w3, rotrslice(w0, 19, out))
+	xorslice(c.ek[0][:], w0, rotrslice(out, w1, 19))
+	xorslice(c.ek[1][:], w1, rotrslice(out, w2, 19))
+	xorslice(c.ek[2][:], w2, rotrslice(out, w3, 19))
+	xorslice(c.ek[3][:], w3, rotrslice(out, w0, 19))
 
-	xorslice(c.ek[4][:], w0, rotrslice(w1, 31, out))
-	xorslice(c.ek[5][:], w1, rotrslice(w2, 31, out))
-	xorslice(c.ek[6][:], w2, rotrslice(w3, 31, out))
-	xorslice(c.ek[7][:], w3, rotrslice(w0, 31, out))
+	xorslice(c.ek[4][:], w0, rotrslice(out, w1, 31))
+	xorslice(c.ek[5][:], w1, rotrslice(out, w2, 31))
+	xorslice(c.ek[6][:], w2, rotrslice(out, w3, 31))
+	xorslice(c.ek[7][:], w3, rotrslice(out, w0, 31))
 
-	xorslice(c.ek[8][:], w0, rotlslice(w1, 61, out))
-	xorslice(c.ek[9][:], w1, rotlslice(w2, 61, out))
-	xorslice(c.ek[10][:], w2, rotlslice(w3, 61, out))
-	xorslice(c.ek[11][:], w3, rotlslice(w0, 61, out))
+	xorslice(c.ek[8][:], w0, rotlslice(out, w1, 61))
+	xorslice(c.ek[9][:], w1, rotlslice(out, w2, 61))
+	xorslice(c.ek[10][:], w2, rotlslice(out, w3, 61))
+	xorslice(c.ek[11][:], w3, rotlslice(out, w0, 61))
 
-	xorslice(c.ek[12][:], w0, rotlslice(w1, 31, out))
-	xorslice(c.ek[13][:], w1, rotlslice(w2, 31, out))
-	xorslice(c.ek[14][:], w2, rotlslice(w3, 31, out))
-	xorslice(c.ek[15][:], w3, rotlslice(w0, 31, out))
+	xorslice(c.ek[12][:], w0, rotlslice(out, w1, 31))
+	xorslice(c.ek[13][:], w1, rotlslice(out, w2, 31))
+	xorslice(c.ek[14][:], w2, rotlslice(out, w3, 31))
+	xorslice(c.ek[15][:], w3, rotlslice(out, w0, 31))
 
-	xorslice(c.ek[16][:], w0, rotlslice(w1, 19, out))
+	xorslice(c.ek[16][:], w0, rotlslice(out, w1, 19))
 
 	// decryption subkeys
 	copy(c.dk[0][:], c.ek[c.rounds][:])
@@ -166,26 +166,26 @@ func process(dst, src []byte, rk [][16]byte, rounds int) {
 
 	var out [16]byte
 
-	fo(src, rk[0][:], out[:])
-	fe(out[:], rk[1][:], out[:])
-	fo(out[:], rk[2][:], out[:])
-	fe(out[:], rk[3][:], out[:])
-	fo(out[:], rk[4][:], out[:])
-	fe(out[:], rk[5][:], out[:])
-	fo(out[:], rk[6][:], out[:])
-	fe(out[:], rk[7][:], out[:])
-	fo(out[:], rk[8][:], out[:])
-	fe(out[:], rk[9][:], out[:])
-	fo(out[:], rk[10][:], out[:])
+	fo(out[:], src, rk[0][:])
+	fe(out[:], out[:], rk[1][:])
+	fo(out[:], out[:], rk[2][:])
+	fe(out[:], out[:], rk[3][:])
+	fo(out[:], out[:], rk[4][:])
+	fe(out[:], out[:], rk[5][:])
+	fo(out[:], out[:], rk[6][:])
+	fe(out[:], out[:], rk[7][:])
+	fo(out[:], out[:], rk[8][:])
+	fe(out[:], out[:], rk[9][:])
+	fo(out[:], out[:], rk[10][:])
 
 	if rounds > 12 {
-		fe(out[:], rk[11][:], out[:])
-		fo(out[:], rk[12][:], out[:])
+		fe(out[:], out[:], rk[11][:])
+		fo(out[:], out[:], rk[12][:])
 	}
 
 	if rounds > 14 {
-		fe(out[:], rk[13][:], out[:])
-		fo(out[:], rk[14][:], out[:])
+		fe(out[:], out[:], rk[13][:])
+		fo(out[:], out[:], rk[14][:])
 	}
 
 	// final round
@@ -195,7 +195,7 @@ func process(dst, src []byte, rk [][16]byte, rounds int) {
 }
 
 // round function for odd rounds
-func fo(d, rk, out []byte) {
+func fo(out, d, rk []byte) {
 
 	var o [16]byte
 
@@ -205,7 +205,7 @@ func fo(d, rk, out []byte) {
 }
 
 // round function for even rounds
-func fe(d, rk, out []byte) {
+func fe(out, d, rk []byte) {
 
 	var o [16]byte
 
