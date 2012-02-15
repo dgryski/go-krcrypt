@@ -51,7 +51,7 @@ func rotrslice(b []byte, count int, o []byte) []byte {
 	return o
 }
 
-// rotate a slice of 16 bytes right by 'count' bits.  The output goes in 'o'
+// rotate a slice of 16 bytes left by 'count' bits.  The output goes in 'o'
 func rotlslice(b []byte, count int, o []byte) []byte {
 	return rotrslice(b, (16*8)-count, o)
 }
