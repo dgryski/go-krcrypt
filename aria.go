@@ -71,30 +71,25 @@ func NewAria(key []byte) (*AriaCipher, error) {
 
 	var ck1, ck2, ck3 []byte
 
-	kr := make([]byte, 16)
-	kl := make([]byte, 16)
-
 	switch len(key) {
 	case 16:
 		c.rounds = 12
 		ck1, ck2, ck3 = c1, c2, c3
-		copy(kl, key[0:16])
-		// kr = {0}
 	case 24:
 		c.rounds = 14
 		ck1, ck2, ck3 = c2, c3, c1
-		copy(kl, key[0:16])
-		copy(kr, key[16:])
-
 	case 32:
 		c.rounds = 16
 		ck1, ck2, ck3 = c3, c1, c2
-		copy(kl, key[0:16])
-		copy(kr, key[16:])
-
 	default:
 		return nil, KeySizeError(len(key))
 	}
+
+	kr := make([]byte, 16)
+	kl := make([]byte, 16)
+
+	copy(kl, key[0:16])
+	copy(kr, key[16:])
 
 	// key whitening
 	w0 := make([]byte, 16)
