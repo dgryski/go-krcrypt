@@ -126,11 +126,16 @@ func NewAria(key []byte) (*AriaCipher, error) {
 	xorslice(c.ek[11][:], w3, rotlslice(out, w0, 61))
 
 	xorslice(c.ek[12][:], w0, rotlslice(out, w1, 31))
-	xorslice(c.ek[13][:], w1, rotlslice(out, w2, 31))
-	xorslice(c.ek[14][:], w2, rotlslice(out, w3, 31))
-	xorslice(c.ek[15][:], w3, rotlslice(out, w0, 31))
 
-	xorslice(c.ek[16][:], w0, rotlslice(out, w1, 19))
+	if c.rounds > 12 {
+		xorslice(c.ek[13][:], w1, rotlslice(out, w2, 31))
+		xorslice(c.ek[14][:], w2, rotlslice(out, w3, 31))
+	}
+
+	if c.rounds > 14 {
+		xorslice(c.ek[15][:], w3, rotlslice(out, w0, 31))
+		xorslice(c.ek[16][:], w0, rotlslice(out, w1, 19))
+	}
 
 	// decryption subkeys
 	copy(c.dk[0][:], c.ek[c.rounds][:])
