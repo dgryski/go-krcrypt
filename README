@@ -2,7 +2,7 @@ This library is an implementation of ciphers from Korea Internet Security Agency
 Copyright (c) Damian Gryski <damian@gryski.com>
 Licensed under the GPLv3 or, at your option, any later version.
 
-So far, the library includes HIGHT and SEED.  ARIA support is planned.
+The library includes HIGHT, SEED, and ARIA.
 
 These ciphers are used almost exclusively inside Korea.
 
