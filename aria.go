@@ -140,7 +140,7 @@ func NewAria(key []byte) (*AriaCipher, error) {
 	// decryption subkeys
 	copy(c.dk[0][:], c.ek[c.rounds][:])
 	for i := 1; i < c.rounds; i++ {
-		a(c.ek[c.rounds-i][:], c.dk[i][:])
+		a(c.dk[i][:], c.ek[c.rounds-i][:])
 	}
 	copy(c.dk[c.rounds][:], c.ek[0][:])
 
@@ -201,7 +201,7 @@ func fo(out, d, rk []byte) {
 
 	xorslice(o[:], d, rk)
 	sl1(o[:], o[:])
-	a(o[:], out)
+	a(out, o[:])
 }
 
 // round function for even rounds
@@ -211,11 +211,11 @@ func fe(out, d, rk []byte) {
 
 	xorslice(o[:], d, rk)
 	sl2(o[:], o[:])
-	a(o[:], out)
+	a(out, o[:])
 }
 
 // substitution layer
-func sl1(x, y []byte) {
+func sl1(y, x []byte) {
 
 	y[0] = sb1[x[0]]
 	y[1] = sb2[x[1]]
@@ -238,7 +238,7 @@ func sl1(x, y []byte) {
 	y[15] = sb4[x[15]]
 }
 
-func sl2(x, y []byte) {
+func sl2(y, x []byte) {
 	y[0] = sb3[x[0]]
 	y[1] = sb4[x[1]]
 	y[2] = sb1[x[2]]
@@ -261,7 +261,7 @@ func sl2(x, y []byte) {
 }
 
 // diffusion layer
-func a(x, y []byte) {
+func a(y, x []byte) {
 	y[0] = x[3] ^ x[4] ^ x[6] ^ x[8] ^ x[9] ^ x[13] ^ x[14]
 	y[1] = x[2] ^ x[5] ^ x[7] ^ x[8] ^ x[9] ^ x[12] ^ x[15]
 	y[2] = x[1] ^ x[4] ^ x[6] ^ x[10] ^ x[11] ^ x[12] ^ x[15]
