@@ -11,4 +11,3 @@ For more information on these ciphers, please see: http://seed.kisa.or.kr/kor/ma
 TODO:
    SEED-192 and SEED-256 support
    ARIA lookup table implementation
-   Unexport cipher types?  -> NewFoo() returns cipher.Block

@@ -1,5 +1,7 @@
 package dkrcrypt
 
+import "crypto/cipher"
+
 // The ARIA Block cipher from KISA
 // Copyright (c) 2012 Damian Gryski <damian@gryski.com>
 // Licensed under the GPLv3 or, at your option, any later version.
@@ -17,8 +19,8 @@ http://seed.kisa.or.kr/kor/aria/aria.jsp
 
 */
 
-// An AriaCipher is an instance of ARIA encryption using a particular key
-type AriaCipher struct {
+// An ariaCipher is an instance of ARIA encryption using a particular key
+type ariaCipher struct {
 	ek     [17][16]byte // encryption subkeys
 	dk     [17][16]byte // decryption subkeys
 	rounds int          // how many rounds
@@ -63,11 +65,11 @@ func xorslice(o, a, b []byte) {
 	}
 }
 
-// NewAria creates and returns a new AriaCipher.
+// NewARIA creates and returns a cipher.Block implementing ARIA.
 // The key argument should be 16/24/32 bytes.
-func NewAria(key []byte) (*AriaCipher, error) {
+func NewARIA(key []byte) (cipher.Block, error) {
 
-	c := new(AriaCipher)
+	c := new(ariaCipher)
 
 	var ck1, ck2, ck3 []byte
 
@@ -147,18 +149,9 @@ func NewAria(key []byte) (*AriaCipher, error) {
 	return c, nil
 }
 
-// BlockSize returns the ARIA block size.  It is needed to satisfy the Block interface in crypto/cipher.
-func (c *AriaCipher) BlockSize() int { return 8 }
-
-// Encrypt encrypts the 8-byte block in src and stores the resulting ciphertext in dst.
-func (c *AriaCipher) Encrypt(dst, src []byte) {
-	process(dst, src, c.ek[:], c.rounds)
-}
-
-// Decrypt decrypts the 8-byte block in src and stores the resulting plaintext in dst.
-func (c *AriaCipher) Decrypt(dst, src []byte) {
-	process(dst, src, c.dk[:], c.rounds)
-}
+func (c *ariaCipher) BlockSize() int          { return 8 }
+func (c *ariaCipher) Encrypt(dst, src []byte) { process(dst, src, c.ek[:], c.rounds) }
+func (c *ariaCipher) Decrypt(dst, src []byte) { process(dst, src, c.dk[:], c.rounds) }
 
 // the main crypter function, shared between encryption and decryption.
 // only the round keys are different

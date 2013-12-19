@@ -15,11 +15,12 @@ http://seed.kisa.or.kr/kor/hight/hightInfo.jsp
 */
 
 import (
+	"crypto/cipher"
 	"strconv"
 )
 
-// A HightCipher is an instance of HIGHT encryption using a particular key.
-type HightCipher struct {
+// A hightCipher is an instance of HIGHT encryption using a particular key.
+type hightCipher struct {
 	wk [8]byte   // whitened keys
 	sk [128]byte // subkeys
 }
@@ -30,10 +31,10 @@ func (k KeySizeError) Error() string {
 	return "dkrcrypt: invalid key size " + strconv.Itoa(int(k))
 }
 
-// NewHight creates and returns a new HightCipher.
+// NewHIGHT creates and returns a new cipher.Block implementing the HIGHT cipher.
 // The key argument should be 16 bytes.
-func NewHight(key []byte) (*HightCipher, error) {
-	c := new(HightCipher)
+func NewHIGHT(key []byte) (cipher.Block, error) {
+	c := new(hightCipher)
 
 	if klen := len(key); klen != 16 {
 		return nil, KeySizeError(klen)
@@ -44,8 +45,7 @@ func NewHight(key []byte) (*HightCipher, error) {
 	return c, nil
 }
 
-// BlockSize returns the Hight block size.  It is needed to satisfy the Block interface in crypto/cipher.
-func (c *HightCipher) BlockSize() int { return 8 }
+func (c *hightCipher) BlockSize() int { return 8 }
 
 // rotate left
 func rotl8(x byte, r byte) byte {
@@ -63,7 +63,7 @@ func f1(x byte) byte {
 }
 
 // Encrypt encrypts the 8-byte block in src and stores the resulting ciphertext in dst.
-func (c *HightCipher) Encrypt(dst, src []byte) {
+func (c *hightCipher) Encrypt(dst, src []byte) {
 
 	// numbering looks off here, because the plaintext is stored msb, but
 	// having lsb makes our life easier
@@ -104,7 +104,7 @@ func (c *HightCipher) Encrypt(dst, src []byte) {
 }
 
 // Decrypt decrypts the 8-byte block in src and stores the resulting plaintext in dst.
-func (c *HightCipher) Decrypt(dst, src []byte) {
+func (c *hightCipher) Decrypt(dst, src []byte) {
 
 	// whitening
 	x := [...]byte{
@@ -147,7 +147,7 @@ func (c *HightCipher) Decrypt(dst, src []byte) {
 	dst[0] = x[7]           // p7
 }
 
-func (c *HightCipher) whiten(mk []byte) {
+func (c *hightCipher) whiten(mk []byte) {
 
 	for i := 0; i < 4; i++ {
 		c.wk[i] = mk[16-i-12-1]
@@ -189,7 +189,7 @@ var delta = []byte{
 	0x74, 0x3a, 0x5d, 0x2e, 0x57, 0x6b, 0x35, 0x5a,
 }
 
-func (c *HightCipher) subkeys(mk []byte) {
+func (c *hightCipher) subkeys(mk []byte) {
 
 	for i := 0; i < 8; i++ {
 

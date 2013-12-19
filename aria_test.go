@@ -46,10 +46,10 @@ var ariaTestVectors = []struct {
 }
 
 // make sure we can encrypt to produce our test vectors, and decrypt to produce the original plaintext.
-func TestAriaEncrypt(t *testing.T) {
+func TestARIAEncrypt(t *testing.T) {
 
 	for _, v := range ariaTestVectors {
-		a, _ := NewAria(v.key)
+		a, _ := NewARIA(v.key)
 
 		var c, p [16]byte
 

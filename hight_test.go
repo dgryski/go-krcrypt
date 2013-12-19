@@ -19,10 +19,10 @@ var hightTestVectors = []struct {
 }
 
 // make sure we can encrypt to produce our test vectors, and decrypt to produce the original plaintext.
-func TestHightEncrypt(t *testing.T) {
+func TestHIGHTEncrypt(t *testing.T) {
 
 	for _, v := range hightTestVectors {
-		h, _ := NewHight(v.key)
+		h, _ := NewHIGHT(v.key)
 
 		var c, p [8]byte
 

@@ -16,6 +16,7 @@ http://seed.kisa.or.kr/eng/about/about.jsp
 */
 
 import (
+	"crypto/cipher"
 	"encoding/binary"
 )
 
@@ -38,14 +39,15 @@ func rotrbyte32(x0, x1 uint32) (uint32, uint32) {
 }
 
 // A SEEDCipher is an instance of SEED encryption using a particular key
-type SEEDCipher struct {
+type seedCipher struct {
 	k0 [17]uint32 // 1 extra to make our lives easier w/r/t indexing
 	k1 [17]uint32
 }
 
-// NewSEED creates and returns a new SEEDCipher.  The key argument should be 16 bytes.
-func NewSEED(key []byte) (*SEEDCipher, error) {
-	c := new(SEEDCipher)
+// NewSEED creates and returns a new cipher.Block implementing SEED encryption
+// with a particular key.  The key argument should be 16 bytes.
+func NewSEED(key []byte) (cipher.Block, error) {
+	c := new(seedCipher)
 
 	if klen := len(key); klen != 16 {
 		return nil, KeySizeError(klen)
@@ -56,10 +58,10 @@ func NewSEED(key []byte) (*SEEDCipher, error) {
 }
 
 // BlockSize returns the HIGHT block size.  It is needed to satisfy the Block interface in crypto/cipher.
-func (c *SEEDCipher) BlockSize() int { return 16 }
+func (c *seedCipher) BlockSize() int { return 16 }
 
 // Encrypt encrypts the 16-byte block in src and stores the resulting ciphertext in dst.
-func (c *SEEDCipher) Encrypt(dst, src []byte) {
+func (c *seedCipher) Encrypt(dst, src []byte) {
 
 	l0 := binary.BigEndian.Uint32(src)
 	l1 := binary.BigEndian.Uint32(src[4:])
@@ -84,7 +86,7 @@ func (c *SEEDCipher) Encrypt(dst, src []byte) {
 }
 
 // Decrypt decrypts the 16-byte block in src and stores the resulting plaintext in dst.
-func (c *SEEDCipher) Decrypt(dst, src []byte) {
+func (c *seedCipher) Decrypt(dst, src []byte) {
 
 	l0 := binary.BigEndian.Uint32(src)
 	l1 := binary.BigEndian.Uint32(src[4:])
@@ -109,7 +111,7 @@ func (c *SEEDCipher) Decrypt(dst, src []byte) {
 }
 
 // compute the round subkeys
-func (c *SEEDCipher) subkeys(key []byte) {
+func (c *seedCipher) subkeys(key []byte) {
 
 	key0 := binary.BigEndian.Uint32(key)
 	key1 := binary.BigEndian.Uint32(key[4:])
