@@ -28,7 +28,7 @@ type hightCipher struct {
 type KeySizeError int
 
 func (k KeySizeError) Error() string {
-	return "dkrcrypt: invalid key size " + strconv.Itoa(int(k))
+	return "krcrypt: invalid key size " + strconv.Itoa(int(k))
 }
 
 // NewHIGHT creates and returns a new cipher.Block implementing the HIGHT cipher.
