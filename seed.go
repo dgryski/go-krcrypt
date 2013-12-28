@@ -1,4 +1,4 @@
-package dkrcrypt
+package krcrypt
 
 // The SEED-128 Block cipher from KISA
 // Copyright (c) 2012 Damian Gryski <damian@gryski.com>

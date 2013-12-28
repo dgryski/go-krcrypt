@@ -1,4 +1,4 @@
-package dkrcrypt
+package krcrypt
 
 import "crypto/cipher"
 

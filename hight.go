@@ -1,4 +1,4 @@
-package dkrcrypt
+package krcrypt
 
 // The HIGHT Block cipher from KISA
 // Copyright (c) 2012 Damian Gryski <damian@gryski.com>
