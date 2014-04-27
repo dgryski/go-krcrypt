@@ -40,8 +40,8 @@ func rotrbyte32(x0, x1 uint32) (uint32, uint32) {
 
 // A SEEDCipher is an instance of SEED encryption using a particular key
 type seedCipher struct {
-	k0 [17]uint32 // 1 extra to make our lives easier w/r/t indexing
-	k1 [17]uint32
+	k0 [16]uint32
+	k1 [16]uint32
 }
 
 // NewSEED creates and returns a new cipher.Block implementing SEED encryption
@@ -68,14 +68,14 @@ func (c *seedCipher) Encrypt(dst, src []byte) {
 	r0 := binary.BigEndian.Uint32(src[8:])
 	r1 := binary.BigEndian.Uint32(src[12:])
 
-	for i := 1; i <= 15; i++ {
+	for i := 0; i < 15; i++ {
 		t0, t1 := r0, r1
 		f0, f1 := f(c.k0[i], c.k1[i], r0, r1)
 		r0, r1 = l0^f0, l1^f1
 		l0, l1 = t0, t1
 	}
 
-	f0, f1 := f(c.k0[16], c.k1[16], r0, r1)
+	f0, f1 := f(c.k0[15], c.k1[15], r0, r1)
 	l0 ^= f0
 	l1 ^= f1
 
@@ -93,11 +93,11 @@ func (c *seedCipher) Decrypt(dst, src []byte) {
 	r0 := binary.BigEndian.Uint32(src[8:])
 	r1 := binary.BigEndian.Uint32(src[12:])
 
-	f0, f1 := f(c.k0[16], c.k1[16], r0, r1)
+	f0, f1 := f(c.k0[15], c.k1[15], r0, r1)
 	l0 ^= f0
 	l1 ^= f1
 
-	for i := 15; i >= 1; i-- {
+	for i := 14; i >= 0; i-- {
 		t0, t1 := l0, l1
 		f0, f1 := f(c.k0[i], c.k1[i], t0, t1)
 		l0, l1 = r0^f0, r1^f1
@@ -118,10 +118,10 @@ func (c *seedCipher) subkeys(key []byte) {
 	key2 := binary.BigEndian.Uint32(key[8:])
 	key3 := binary.BigEndian.Uint32(key[12:])
 
-	for i := 1; i <= 16; i++ {
+	for i := 0; i < 16; i++ {
 		c.k0[i] = g(key0 + key2 - kc[i])
 		c.k1[i] = g(key1 - key3 + kc[i])
-		if i&1 == 1 {
+		if i&1 == 0 {
 			key0, key1 = rotrbyte32(key0, key1)
 		} else {
 			key2, key3 = rotlbyte32(key2, key3)
@@ -130,7 +130,6 @@ func (c *seedCipher) subkeys(key []byte) {
 }
 
 var kc = [...]uint32{
-	0x00000000, // place holder -- makes indexing with subkey round counter easier
 	0x9E3779B9, 0x3C6EF373, 0x78DDE6E6, 0xF1BBCDCC,
 	0xE3779B99, 0xC6EF3733, 0x8DDE6E67, 0x1BBCDCCF,
 	0x3779B99E, 0x6EF3733C, 0xDDE6E678, 0xBBCDCCF1,
