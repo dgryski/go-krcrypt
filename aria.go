@@ -4,7 +4,7 @@ import "crypto/cipher"
 
 // The ARIA Block cipher from KISA
 // Copyright (c) 2012 Damian Gryski <damian@gryski.com>
-// Licensed under the GPLv3 or, at your option, any later version.
+// Licensed under the MIT License
 
 // The cipher operates on 128-bit items, but some pieces are in bytes.
 // This entire implementation is based around byte, but we should perhaps switch to larger (32-bit?) items.

@@ -2,7 +2,7 @@
 Package krcrypt is an implementation of ciphers from Korea Internet Security Agency.
 
 Copyright (c) Damian Gryski <damian@gryski.com>
-Licensed under the GPLv3 or, at your option, any later version.
+Licensed under the MIT License
 
 The library includes HIGHT, SEED, and ARIA.
 

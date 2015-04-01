@@ -2,7 +2,7 @@ package krcrypt
 
 // The HIGHT Block cipher from KISA
 // Copyright (c) 2012 Damian Gryski <damian@gryski.com>
-// Licensed under the GPLv3 or, at your option, any later version.
+// Licensed under the MIT License
 
 /*
 
