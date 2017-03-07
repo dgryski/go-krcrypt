@@ -46,8 +46,8 @@ func rotrslice(o, b []byte, count int) []byte {
 	for i := range b {
 		oi := (i + byterot) % 16
 		oi1 := (i + byterot + 1) % 16
-		o[oi] = (o[oi] & (0xff << uint((8 - bitrot)))) | (b[i] >> bitrot)
-		o[oi1] = (o[oi1] & (0xff >> bitrot)) | (b[i] << uint((8 - bitrot)))
+		o[oi] = (o[oi] & (0xff << (8 - bitrot))) | (b[i] >> bitrot)
+		o[oi1] = (o[oi1] & (0xff >> bitrot)) | (b[i] << (8 - bitrot))
 	}
 
 	return o

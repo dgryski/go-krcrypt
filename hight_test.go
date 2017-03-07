@@ -28,13 +28,13 @@ func TestHIGHTEncrypt(t *testing.T) {
 
 		h.Encrypt(c[:], v.plain)
 
-		if bytes.Compare(v.cipher, c[:]) != 0 {
+		if !bytes.Equal(v.cipher, c[:]) {
 			t.Errorf("hight encrypt failed: got %#v wanted %#v\n", c, v.cipher)
 		}
 
 		h.Decrypt(p[:], c[:])
 
-		if bytes.Compare(v.plain, p[:]) != 0 {
+		if !bytes.Equal(v.plain, p[:]) {
 			t.Errorf("hight decrypt failed: got %#v wanted %#v\n", p, v.plain)
 		}
 	}

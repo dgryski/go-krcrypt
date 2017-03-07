@@ -25,6 +25,7 @@ type hightCipher struct {
 	sk [128]byte // subkeys
 }
 
+// KeySizeError is returned for invalid key sizes
 type KeySizeError int
 
 func (k KeySizeError) Error() string {

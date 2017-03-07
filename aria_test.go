@@ -55,13 +55,13 @@ func TestARIAEncrypt(t *testing.T) {
 
 		a.Encrypt(c[:], v.plain)
 
-		if bytes.Compare(v.cipher, c[:]) != 0 {
+		if !bytes.Equal(v.cipher, c[:]) {
 			t.Errorf("aria encrypt failed: got %#v wanted %#v\n", c, v.cipher)
 		}
 
 		a.Decrypt(p[:], c[:])
 
-		if bytes.Compare(v.plain, p[:]) != 0 {
+		if !bytes.Equal(v.plain, p[:]) {
 			t.Errorf("aria decrypt failed: got %#v wanted %#v\n", p, v.plain)
 		}
 	}
