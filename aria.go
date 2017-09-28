@@ -149,7 +149,7 @@ func NewARIA(key []byte) (cipher.Block, error) {
 	return c, nil
 }
 
-func (c *ariaCipher) BlockSize() int          { return 8 }
+func (c *ariaCipher) BlockSize() int          { return 16 }
 func (c *ariaCipher) Encrypt(dst, src []byte) { process(dst, src, c.ek[:], c.rounds) }
 func (c *ariaCipher) Decrypt(dst, src []byte) { process(dst, src, c.dk[:], c.rounds) }
 
